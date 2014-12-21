@@ -1,17 +1,18 @@
-#include <cstdio>
 #include "../include/User.h"
 
 
 
 
-User::User(int id_user) {
-    this->id_user = id_user;
+User::User(int user_fd) {
+    this->user_fd = user_fd;
+    this->user_id = -1;
+
 }
 
 User::~User() {
-
+    close(this->user_fd);
 }
 
 bool User::sendMsg(Msg& m) {
-    printf("[%d]I've got msg!: %s\n", id_user, m.serialize());
+    printf("[%d]I've got msg!: %s\n", user_id, m.serialize());
 }

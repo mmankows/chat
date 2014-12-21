@@ -2,7 +2,7 @@
 
 Chat::Chat(vector<User*> members) {
     this->members  = members;
-    this->id_owner = members.size() ? members[0]->get_id() : -1;
+    this->id_owner = members.size() ? members[0]->getId() : -1;
 }
 
 Chat::~Chat() {
@@ -16,7 +16,7 @@ bool Chat::addUser(User* usr_ptr) {
 bool Chat::delUser(User* usr_ptr) {
     vector<User*>::iterator it = members.begin();
     do {
-        if ( (*it)->get_id() == usr_ptr->get_id() ) {
+        if ( (*it)->getId() == usr_ptr->getId() ) {
             members.erase(it);
             return true;
         }

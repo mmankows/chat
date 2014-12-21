@@ -1,1 +1,1 @@
-g++ -ansi src/* main.c -o chatServer
+g++ -ansi -lssl  src/* main.c -o chatServer

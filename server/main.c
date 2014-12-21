@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cstdio>
+#include <exception>
 #include "include/headers.h"
 
+
 int main() {
-    ChatServer myServer("127.0.1.2", 1234);
+    ChatServer myServer;
     vector<User*> v;
     User u1(1);
     User u2(21);
@@ -12,6 +14,7 @@ int main() {
     StdMsg m;
 
 
+    
     c->addUser(&u1);
     c->addUser(&u2);
     c->addUser(&u3);
@@ -27,6 +30,8 @@ int main() {
    
 
     c->broadcastMsg(m);
+
+    myServer.startListening();
 
     return 0;
 }
