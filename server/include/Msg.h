@@ -1,8 +1,11 @@
 #pragma once
+#include <cstring>
 
 class Msg {
+    protected:
     int type;
-    int id_receiver;
+    int id_to;
+    int content_len;
     
     public:
     Msg();

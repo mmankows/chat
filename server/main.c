@@ -11,8 +11,8 @@ int main() {
     User u2(21);
     User u3(134);
     Chat* c = new Chat(v);
-    StdMsg m;
-
+    StdMsg m("To jest tresc wiadomosci do wyslania, zostanie zserializowana");
+    printf("Serialized message:%s",m.serialize());
 
     
     c->addUser(&u1);

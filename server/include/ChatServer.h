@@ -8,6 +8,7 @@
 #include <openssl/md5.h>
 #include <cstring>
 #include <iostream>
+#include <string>
 #include <map>
 
 #include "User.h"

@@ -1,4 +1,5 @@
 #include "../include/ChatServer.h"
+#include <fstream>
 
 
 //constructor
@@ -16,9 +17,37 @@ ChatServer::~ChatServer() {
 }
 
 int ChatServer::_auth_file(string login, string password) {
-    string filename = "user_db.txt";
+    const char* filename  = "user_db.txt";
+    string line;
+    bool auth_status = false;
     
-    return ++c_user;
+    ifstream dbfile;
+    dbfile.open(filename);
+    if( !dbfile.is_open() ) {
+        cerr<<"Error opening file";
+    }
+    
+    string curr_login, curr_pass;
+    int id = -1;
+    while( std::getline(dbfile,line) ) {
+        int sep_pos = line.find(':');
+        curr_login  = line.substr(0,sep_pos);
+    
+        if( !curr_login.compare(login) ) {
+            cout<<"Found user in file" <<login<<endl;
+            line        = line.substr(sep_pos+1);
+            sep_pos     = line.find(':');
+            curr_pass   = line.substr(0,sep_pos);
+            cout<<"Comparing " <<curr_pass<<" and "<<password<<endl;
+            if( !curr_pass.compare(password) ) {
+                id = atoi( line.substr(sep_pos+1).c_str() );
+            } 
+            break;
+        }
+    }
+
+    dbfile.close();
+    return id;
 }
 
 
@@ -73,11 +102,14 @@ void ChatServer::_init() {
 
 }
 
+
+//Main subroutine for serving specific User
 void* serve_user(void* ptr) {
     User* user_ptr = static_cast<User*>(ptr);
     int sockfd     = user_ptr->getFd();
     int red        = -1;
     
+
     while( 1 ) {
     char buf[256];
         red = read(sockfd, buf, sizeof(buf));
@@ -91,11 +123,13 @@ void* serve_user(void* ptr) {
 }
 
 void ChatServer::startListening(void) {
-    cout<<"Listening..."<<endl;
+    cout<<"ChatServer::startListening()"<<endl;
     struct sockaddr_in cli_addr;
     int    size      = sizeof(cli_addr);
     int    clientfd  = 0;
     User* tmp_user_ptr;
+    
+    _auth("user1\036atojesthaslo");
 
     listen(this->listenfd, 30);
 

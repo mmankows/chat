@@ -1,17 +1,17 @@
 #pragma once
 #include "Msg.h"
+#define STDMSG_MAXLEN sizeof(int)*4
 
 class StdMsg : public Msg {
-    char* buffer;
+    
+    char content[STDMSG_MAXLEN];
+
 
     public:
 
-    StdMsg();
+    StdMsg(const char* content);
     ~StdMsg();
 
     char* serialize();
-    
-
-
 
 };
