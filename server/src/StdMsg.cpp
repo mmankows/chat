@@ -9,15 +9,21 @@ StdMsg::StdMsg(const char* content) : Msg(){
 
 }
 StdMsg::~StdMsg() {}
-char* StdMsg::serialize() {
-    int header[4] = {type, id_to, -1, content_len};
-    char* smsg    = new char[sizeof(header) + 255];
-    
-    memcpy((void*)smsg,                  (void*)header,         sizeof(header));
-    memcpy((void*)(smsg+sizeof(header)), (void*)this->content,  strlen(this->content));
-    for(int i=0; i<255+sizeof(header); i++) {
-        printf("%c",smsg[i]);
-    }
-    
-    return smsg;
+
+void StdMsg::serialize(int sockfd) {
+
+    FILE* fp = fdopen(1,"w");
+    FileStream s(fp);
+
+    PrettyWriter<FileStream> writer(s);
+
+    writer.StartObject();
+        
+    writer.String("school");
+    writer.String("GPA");
+
+    writer.EndObject();
+
+    printf("Finished writing.\n");
+
 }

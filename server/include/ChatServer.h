@@ -11,9 +11,10 @@
 #include <string>
 #include <map>
 
+
 #include "User.h"
 #include "Chat.h"
-
+#include "UserList.h"
 
 using namespace std;
 
@@ -21,18 +22,20 @@ class ChatServer {
     
     private:
     int     port;
-
     int     listenfd;
 
     int     c_user;
     int     c_chat;
-    map<int,User> connectedUsers;
+
+    UserList connectedUsers;
     map<int,Chat> activeChats;
 
-    void  _init();
-    int   _auth(string auth_token);
-    int   _auth_file(string login, string hashword);
-    friend void* serve_user(void*);
+
+    void  init();
+    static string get_auth_token(int sockfd);
+    static int    auth(string auth_token);
+    static int    auth_file(string login, string hashword);
+    friend void*  serve_user(void*);
     
     public:
     ChatServer(int port=258412);

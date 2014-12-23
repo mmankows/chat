@@ -3,15 +3,17 @@
 #define STDMSG_MAXLEN sizeof(int)*4
 
 class StdMsg : public Msg {
-    
-    char content[STDMSG_MAXLEN];
+    private:
 
+    char content[STDMSG_MAXLEN];
+    
+    
+    void serialize(int sockfd);
 
     public:
 
     StdMsg(const char* content);
     ~StdMsg();
 
-    char* serialize();
 
 };

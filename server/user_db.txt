@@ -1,1 +1,2 @@
-user1:ksdfj392ujfm9c03_434it+324:1
+user1:haslo1:1
+user2:haslo2:2

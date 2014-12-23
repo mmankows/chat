@@ -1,11 +1,16 @@
 #include "../include/User.h"
-
-
-
+#include "../include/ChatServer.h"
 
 User::User(int user_fd) {
     this->user_fd = user_fd;
     this->user_id = -1;
+
+}
+
+User::User(int user_fd, int user_id, string login) {
+    this->user_fd = user_fd;
+    this->user_id = user_id;
+    this->user_login = login;
 
 }
 
@@ -14,5 +19,6 @@ User::~User() {
 }
 
 bool User::sendMsg(Msg& m) {
-    printf("[%d]I've got msg!: %s\n", user_id, m.serialize());
+    printf("Sending msg");
+    m.send( getFd() );
 }
