@@ -13,7 +13,6 @@
 
 
 #include "User.h"
-#include "Chat.h"
 #include "UserList.h"
 
 using namespace std;
@@ -28,7 +27,6 @@ class ChatServer {
     int     c_chat;
 
     UserList connectedUsers;
-    map<int,Chat> activeChats;
 
 
     void  init();
