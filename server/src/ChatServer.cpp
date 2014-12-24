@@ -125,21 +125,19 @@ void* serve_user(void* ptr) {
     srv_ptr->connectedUsers.addUser(user_ptr);
 
     while( 1 ) {
-        // Should be somethign like this:
-        // Msg *m = user_ptr.getMsg();                          //blocking reading from socket, deserialize, pack to class
-        // while( int targetid = m.resolveTarget() )  {         //return next target id red from message
-        //      lock_target_socket()
-        //      srv_ptr->connectedUsers[targetid].sendMsg(m)    //write message to target
-        //      unlock_target_socket();
-        // }
+        
+        StdMsg m = user_ptr->getMsg();                          //blocking reading from socket, deserialize, pack to class
+                                                                //TODO mutex lock inside of User.sendMsg();
+        if( !m.getStatus() ) {
+            cout<<"Problem while reading msg from user\n";
+            //something wrong with reading from user
+            break;
+        }
 
-    char buf[256];
-        red = read(sockfd, buf, sizeof(buf));
-        cout<<"RED:"<<red<<endl;
-        if (red <=0) break;
-        buf[red] = '\0';
-        write(sockfd,"you wrote:",10);
-        write(sockfd,buf,strlen(buf));
+        for( vector<int>::iterator it = m.getTargetIds()->begin(); it != m.getTargetIds()->end(); it++ ) {
+            srv_ptr->connectedUsers[*it]->sendMsg(m);    //write message to target
+        }
+
     }
     srv_ptr->connectedUsers.delUser(user_id);
     
@@ -148,8 +146,8 @@ void* serve_user(void* ptr) {
 void ChatServer::startListening(void) {
     cout<<"ChatServer::startListening()"<<endl;
     struct sockaddr_in cli_addr;
-    pthread_t tid    = 0;
     int    size      = sizeof(cli_addr);
+    pthread_t tid    = 0;
     int    clientfd  = 0;
     
 

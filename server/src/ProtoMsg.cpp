@@ -3,6 +3,7 @@
 #include <iostream>
 
 ProtoMsg::ProtoMsg(string action) : Msg(){
+    this->type   = 2;
     this->action = action;
 }
 ProtoMsg::~ProtoMsg() {}
@@ -11,7 +12,7 @@ void ProtoMsg::addUserInfo(const User* u) {
     id_nick_pairs.push_back( pair<int,string>( u->getId(), u->getLogin()) );
 }
 
-void ProtoMsg::serialize(int sockfd) {
+bool ProtoMsg::serialize(int sockfd) {
 
     FILE* fp = fdopen(sockfd,"w");
     FileStream s(fp);
@@ -19,6 +20,9 @@ void ProtoMsg::serialize(int sockfd) {
     PrettyWriter<FileStream> writer(s);
 
     writer.StartObject();
+    
+    writer.String("type");
+    writer.Int(type);
         
     writer.String("action");
     writer.String(action.c_str());

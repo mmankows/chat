@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <string>
-#include "Msg.h"
+#include "StdMsg.h"
 #include "patterns/Observer.h"
 
 class ChatServer;
@@ -11,12 +11,10 @@ class ChatServer;
 using namespace std;
 class User : public Observer<Msg> {
     
-    int user_fd;
+    int    user_fd;
     int    user_id;
     string user_login;
-    
-
-    pthread_t user_thread;
+    pthread_mutex_t lock;
 
     public:
 
@@ -26,13 +24,16 @@ class User : public Observer<Msg> {
     ~User();
 
     void       notify(Msg& m) { sendMsg(m); }
-    pthread_t* getThread(void) { return &user_thread; }
+    bool       sendMsg(Msg& m);
+    StdMsg     getMsg(void);
+
     int        getId(void) const { return user_id; }
     void       setId(int id) { this->user_id=id; }
+    
     void       setLogin(string login) { this->user_login=login; }
     string     getLogin(void) const { return this->user_login; }
+    
     int        getFd(void) const { return user_fd; }
-    bool       sendMsg(Msg& m);
 
 
 };

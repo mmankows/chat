@@ -13,7 +13,8 @@ class ProtoMsg : public Msg {
     string action;                  // what happened
     vector<pair<int,string> > id_nick_pairs;     // id-value pairs
 
-    void serialize(int sockfd); 
+    bool serialize(int sockfd); 
+    bool deserialize(int sockfd) {}
     
     public:
     ProtoMsg() {};

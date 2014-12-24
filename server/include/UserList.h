@@ -16,6 +16,7 @@ class UserList : public Subject<User,Msg>  {
     void registerObserver(User* u);
     void unregisterObserver(int user_id);
     void notifyObservers(Msg&);
+    User*& operator[](int user_id) { return users[user_id]; }
     
     void addUser(User* u); 
     void delUser(int user_id);

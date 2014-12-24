@@ -1,5 +1,6 @@
 #include "../include/User.h"
 #include "../include/ChatServer.h"
+#include "../include/StdMsg.h"
 
 User::User(int user_fd) {
     this->user_fd = user_fd;
@@ -21,4 +22,11 @@ User::~User() {
 bool User::sendMsg(Msg& m) {
     printf("Sending msg");
     m.send( getFd() );
+}
+
+StdMsg User::getMsg(void) {
+    printf("Reading msg");
+    StdMsg m;
+    m.get( getFd() );
+    return m;
 }

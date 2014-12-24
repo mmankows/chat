@@ -10,12 +10,12 @@ void UserList::registerObserver(User* u) {
 
 void UserList::unregisterObserver(int user_id) { 
     cout<<"UserList::unregisterObserver()\n";
-    users.erase(user_id);
+    delete users[user_id];   // delete object
+    users.erase(user_id);   // remove pointer
 };
 
 void UserList::notifyObservers(Msg& m) {
     cout<<"UserList::notifyObservers()\n";
-    //Proto m;
     
     for(map<int,User*>::iterator it=users.begin(); it != users.end(); it++) {
         cout<<"Notifying user\n";
@@ -26,11 +26,19 @@ void UserList::notifyObservers(Msg& m) {
 
 void UserList::addUser(User* u) { 
     cout<<"UserList::addUser()\n";
-    ProtoMsg m("add");
-    m.addUserInfo(u);
+
+    ProtoMsg m_others("add");
+    m_others.addUserInfo(u);
     
+    notifyObservers(m_others);
     registerObserver(u); 
-    notifyObservers(m);
+     
+    //send list of all connected users to the new user
+    ProtoMsg m_list("add");
+    for(map<int,User*>::iterator it=users.begin(); it != users.end(); it++) {
+        m_list.addUserInfo( (*it).second );
+    }
+    u->sendMsg(m_list); 
 };
 
 void UserList::delUser(int user_id) { 
@@ -38,6 +46,6 @@ void UserList::delUser(int user_id) {
     ProtoMsg m("del");
     m.addUserInfo(users[user_id]);
     
-    unregisterObserver(user_id);
     notifyObservers(m);    
+    unregisterObserver(user_id);
 };
