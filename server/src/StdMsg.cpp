@@ -1,5 +1,6 @@
 #include "../include/StdMsg.h"
 #include <cstdio>
+#include <unistd.h>
 
 
 StdMsg::StdMsg() : Msg(1) {
