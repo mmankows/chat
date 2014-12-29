@@ -1,6 +1,9 @@
 #include "../include/ChatServer.h"
 #include <fstream>
 #include <map>
+#include <unistd.h>
+#include <pthread.h>
+#include <openssl/md5.h>
 
 
 //constructor
