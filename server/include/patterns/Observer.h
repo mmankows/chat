@@ -1,7 +1,7 @@
 #pragma once
 
 
-//Po klasie obserwator dziedziczy klasa użytkownika serwera
+//Po klasie obserwator dziedziczy klasa użytkownika serwera (User)
 template <typename MSG>
 class Observer {
     
@@ -10,7 +10,7 @@ class Observer {
 
 };
 
-//Po tej klasie dziedziczy klasa User list przechowywujaca liste uzytkownikow
+//Po tej klasie dziedziczy klasa User list przechowywujaca liste uzytkownikow (UserList)
 //przy zmianie stanu listy nalezy powiadomic uzytkownikow.
 template <typename OBS,typename MSG>
 class Subject {

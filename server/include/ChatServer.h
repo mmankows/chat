@@ -23,11 +23,7 @@ class ChatServer {
     int     port;
     int     listenfd;
 
-    int     c_user;
-    int     c_chat;
-
     UserList connectedUsers;
-
 
     void  init();
     static string get_auth_token(int sockfd);

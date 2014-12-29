@@ -5,8 +5,7 @@
 
 //constructor
 ChatServer::ChatServer(int port) {
-    this->port   = port;
-    this->c_user = 0;
+    this->port = port;
 
     init();
 }
@@ -25,7 +24,8 @@ int ChatServer::auth_file(string login, string password) {
     ifstream dbfile;
     dbfile.open(filename);
     if( !dbfile.is_open() ) {
-        cerr<<"Error opening file";
+        cerr<<"Error opening db file";
+        exit(-1);
     }
     
     string curr_login, curr_pass;
@@ -52,6 +52,7 @@ int ChatServer::auth_file(string login, string password) {
 
 //based on authentication token sent from client verify if login/password match. If yes, return clientID from database
 int ChatServer::auth(string auth_token) {
+    
     //extract login, password from authentication token
     int delim_pos = auth_token.find(' '); //\036
     string login  = auth_token.substr(0,delim_pos);
@@ -75,13 +76,12 @@ string ChatServer::get_auth_token(int sockfd) {
     buf[ read(sockfd, buf, sizeof(buf)) ] = '\0';
 
     token = buf;
-    cout<<"AUTH TOKEN IS:"<<token<<endl;
     return token; 
 }
 
 //establish server conection on given addres and port
 void ChatServer::init() {
-    cout<<"Initializing server connection (port:"<<port<<")... "<<endl;
+    cout<<"Initializing server connection (host:localhost, port:"<<port<<")... "<<endl;
     struct sockaddr_in srv_addr;
     memset((void*) &srv_addr, 0, sizeof(srv_addr));
 
@@ -117,11 +117,17 @@ void* serve_user(void* ptr) {
     User* user_ptr      = NULL;
     int red             = -1;
     string login;
+    string token;
 
     delete (std::pair<ChatServer*,int>*) ptr;   //delete structure used for passing args
 
-    user_id = srv_ptr->auth( ChatServer::get_auth_token(sockfd) );
-    user_ptr = new User(sockfd, user_id, "jakistamlogin");
+    token    = ChatServer::get_auth_token(sockfd);
+    if ( ( user_id  = srv_ptr->auth( token ) ) <= 0 ) {
+        close(sockfd);
+        return NULL;
+    };
+    login    = token.substr(0,token.find(' ') );
+    user_ptr = new User(sockfd, user_id, login );
     srv_ptr->connectedUsers.addUser(user_ptr);
 
     while( 1 ) {

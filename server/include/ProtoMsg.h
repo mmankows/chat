@@ -10,8 +10,8 @@
 using namespace std;
 
 class ProtoMsg : public Msg {
-    string action;                  // what happened
-    vector<pair<int,string> > id_nick_pairs;     // id-value pairs
+    string                     action;            // what happened
+    vector<pair<int,string> >  id_nick_pairs;     // id-value pairs
 
     bool serialize(int sockfd); 
     bool deserialize(int sockfd) {}
