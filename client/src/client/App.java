@@ -1,30 +1,22 @@
+package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.LoggingMXBean;
-
-import org.json.JSONObject;
-
-import client.Client;
-import client.Message;
-import client.User;
 
 
-public class app {
+public class App implements MObserver{
 	private static Logger logger = Logger.getLogger("CLIENT LOGGER");
 	static Client chatClient = new Client();
 	
-	public static void main(String[] args) throws InterruptedException, IOException {
+	public void run(String host, int port) throws InterruptedException, IOException {
+		chatClient.addObserwer(this);
 		logger.setLevel(Level.OFF);
-		if(args.length < 2) {
-			System.out.println("No host and port specified.");
-			return;
-		}
 		
-		if(!chatClient.connect(args[0], Integer.parseInt(args[1]))) {
+		
+		if(!chatClient.connect(host, port)) {
 			return;
 		}
 		
@@ -43,7 +35,7 @@ public class app {
 		}
 	}
 	
-	public static void handleCommand(String command) {
+	public void handleCommand(String command) {
 		if(command.equals(":q")) {
 			System.out.println("Logout");
 			System.exit(0);
@@ -56,7 +48,7 @@ public class app {
 		}
 	}
 	
-	private static void printUsersList() {
+	private void printUsersList() {
 		ArrayList<User> list = chatClient.getUserList();
 		StringBuilder usersString = new StringBuilder();
 		for (User user : list) {
@@ -66,7 +58,7 @@ public class app {
 		System.out.println(usersString.toString().trim());
 	}
 	
-	private static int getUserUid(String name) {
+	private int getUserUid(String name) {
 		ArrayList<User> list = chatClient.getUserList();
 		for (User user : list) {
 			if(user.getNick().equals(name)) {
@@ -76,7 +68,17 @@ public class app {
 		return -1;
 	}
 	
-	private static void handleMsgRequest(String command) {
+	private String getUserNick(int uid) {
+		ArrayList<User> list = chatClient.getUserList();
+		for (User user : list) {
+			if(user.getUid() == uid) {
+				return user.getNick();
+			}
+		}
+		return "UNKNOWN";
+	}
+	
+	private void handleMsgRequest(String command) {
 		String[] cmd = command.trim().split(" ");
 		if(cmd.length != 3) {
 			System.out.println("Wrong command format");
@@ -97,5 +99,18 @@ public class app {
 		System.out.println("SENDING MESSAGE TO: " + uids.toString());
 		Message messageObj = new Message(message, uids);
 		chatClient.sendMessage(messageObj.JSONEncode());
+	}
+
+	@Override
+	public void update(Object message) {
+		ArrayList<Integer> uids = ((Message) message).getUids();
+		String content = ((Message) message).getMessage();
+		StringBuilder uidsString = new StringBuilder();
+		for (Integer uid : uids) {
+			uidsString.append(getUserNick(uid) + ' ');
+		}
+		
+		System.out.println("To: " + uidsString.toString());
+		System.out.println("Message:\n" + content);
 	}
 }

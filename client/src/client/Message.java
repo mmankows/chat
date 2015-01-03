@@ -9,6 +9,9 @@ public class Message implements JSONSerializable {
 	ArrayList<Integer> uids = new ArrayList<Integer>();
 	String message = null;
 
+	public Message() {
+		
+	}
 	public Message(String message, ArrayList<Integer> uids) {
 		this.message = message;
 		this.uids = new ArrayList<Integer>(uids);
@@ -33,5 +36,12 @@ public class Message implements JSONSerializable {
 		json.accumulate("content", message);
 		return json.toString();
 	}
-
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public ArrayList<Integer> getUids() {
+		return uids;
+	}
 }

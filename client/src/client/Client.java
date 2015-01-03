@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-public class Client {
+public class Client implements MObservable {
 	private Logger logger = Logger.getLogger("CLIENT LOGGER");
 	
 	private Socket socket = null;
@@ -19,6 +19,7 @@ public class Client {
 	private InputStream inStream = null;
 	private Thread serverListenerThread = null;
 	private ArrayList<User> userList = new ArrayList<User>();
+	private Message lastMessage = null;
 	
 	public ArrayList<User> getUserList() {
 		return userList;
@@ -27,14 +28,23 @@ public class Client {
 	private class ServerListener implements Runnable {
 		@Override
 		public void run() {
-			logger.setLevel(Level.OFF);
+			logger.setLevel(Level.ALL);
 			byte[] buffer = new byte[1024];
 			while(true) {
 				logger.info("Listening for message");
 				String message = read();
 				logger.info("Received message");
 				handleMessage(message);
-				System.out.println("MSG!!: " + message);
+				Message messageObject = new Message();
+				try {
+					messageObject.JSONDecode(message);
+					lastMessage = messageObject;
+					notifyObservers();
+				} catch(Exception e) {
+					System.out.println("EXCEPTION");
+					
+				}
+				//System.out.println("MSG!!: " + message);
 			}
 		}
 		
@@ -92,6 +102,24 @@ public class Client {
 			outStream.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private ArrayList<MObserver> observers = new ArrayList<MObserver>();
+	@Override
+	public void addObserwer(MObserver observer) {
+		observers.add(observer);		
+	}
+
+	@Override
+	public void removeObserver(MObserver observer) {
+		observers.remove(observer);
+	}
+
+	@Override
+	public void notifyObservers() {
+		for (MObserver observer: observers) {
+			observer.update(lastMessage);
 		}
 	}
 }
