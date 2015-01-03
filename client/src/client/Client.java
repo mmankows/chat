@@ -34,7 +34,7 @@ public class Client {
 				String message = read();
 				logger.info("Received message");
 				handleMessage(message);
-				System.out.println("MSG: " + message);
+				System.out.println("MSG!!: " + message);
 			}
 		}
 		

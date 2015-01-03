@@ -4,11 +4,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.LoggingMXBean;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import client.Client;
+import client.Message;
 import client.User;
 
 
@@ -31,7 +32,7 @@ public class app {
 		chatClient.sendMessage("user1 haslo1");
 		
 		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-		System.out.print("Users list: \\list\nSend Message: \\msg username message\nExit: vim style :)\n\n");
+		System.out.print("Users list: \\list\nSend Message: \\msg usernames(';' separated) message\nExit: vim style :)\n\n");
 		
 		while(true) {
 			System.out.print("> ");
@@ -81,20 +82,20 @@ public class app {
 			System.out.println("Wrong command format");
 			return;
 		}
-		String user = cmd[1];
+		String[] userList = cmd[1].split(";");
 		String message = cmd[2];
+		
+		ArrayList<Integer> uids = new ArrayList<Integer>();
 		int uid;
-		if((uid = getUserUid(user)) == -1) {
-			System.out.printf("Unknown user '%s'\n", user);
-			return;
+		for (int i = 0; i < userList.length; i++) {
+			if((uid = getUserUid(userList[i])) == -1) {
+				logger.info(String.format("Unknown user '%s'\n", userList[i]));
+			} else {
+				uids.add(uid);
+			}
 		}
-		JSONObject json = new JSONObject();
-		int[] uids = new int[1];
-		uids[0] = uid;
-		json.accumulate("type", 1);
-		json.accumulate("to_id", uids);
-		json.accumulate("content", message);
-		System.out.println(json.toString());
-		chatClient.sendMessage(json.toString());
+		System.out.println("SENDING MESSAGE TO: " + uids.toString());
+		Message messageObj = new Message(message, uids);
+		chatClient.sendMessage(messageObj.JSONEncode());
 	}
 }
