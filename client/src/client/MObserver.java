@@ -2,5 +2,5 @@ package client;
 
 
 public interface MObserver {
-	public void update(Object obj);
+	public void update(MObservableNotification obj);
 }
