@@ -6,6 +6,7 @@ public class MObservableNotification {
 	
 	final static int CODE_REFRESHLIST = 2;
 	final static int CODE_MESSAGE = 1;
+	final static int CODE_CONNECTION_LOST = -1;
 	
 	public int getCode() {
 		return code;

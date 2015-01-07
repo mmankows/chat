@@ -34,11 +34,18 @@ public class Client implements MObservable {
 		public void run() {
 			logger.setLevel(Level.ALL);
 			while (true) {
-				logger.info("Listening for message");
-				String message = read();
-				logger.info("Received message");
-				handleMessage(message);
-				notifyObservers();
+				try {
+					logger.info("Listening for message");
+					String message = read();
+					logger.info("Received message");
+					handleMessage(message);
+					notifyObservers();
+				} catch(Exception e) {
+					lastCode = MObservableNotification.CODE_CONNECTION_LOST;
+					notifyObservers();
+					Thread.currentThread().interrupt();
+					return;
+				}
 				// System.out.println("MSG!!: " + message);
 			}
 		}
@@ -117,10 +124,6 @@ public class Client implements MObservable {
 	public Boolean login(String username, String password) {
 		send(String.format("%s %s", username, password));
 		return true;
-	}
-
-	public void sendMessage(String username, String message) {
-		sendMessage(new String[] { username }, message);
 	}
 
 	public void sendMessage(String[] usernames, String message) {
