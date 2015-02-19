@@ -1,38 +1,49 @@
 package client;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class Message implements JSONSerializable {
-	ArrayList<Integer> uids = new ArrayList<Integer>();
+public class Message {
+	ArrayList<Integer> to = new ArrayList<Integer>();
+	String from = null;
 	String message = null;
+	final Date created = new Date();
 
 	public Message() {
 		
 	}
+	
 	public Message(String message, ArrayList<Integer> uids) {
 		this.message = message;
-		this.uids = new ArrayList<Integer>(uids);
+		this.to = new ArrayList<Integer>(uids);
 	}
 	
-	@Override
-	public void JSONDecode(String json) {
+	public void JSONDecode(String json, ArrayList<User> userList) {
 		JSONObject jsonOBJ = new JSONObject(json);
 		message = jsonOBJ.getString("content");
-		uids = new ArrayList<Integer>();
+		
 		JSONArray jsonUids = jsonOBJ.getJSONArray("to_id");
 		for (int i = 0; i < jsonUids.length(); i++) {
-			uids.add(jsonUids.getInt(i));
+			to.add(jsonUids.getInt(i));
+		}
+		
+		int fromUID = jsonOBJ.getInt("from_id");
+		for (int i = 0; i < userList.size(); i++) {
+			User user = userList.get(i);
+			if(user.getUid() == fromUID) {
+				from = user.getNick();
+				return;
+			}
 		}
 	}
-
-	@Override
+	
 	public String JSONEncode() {
 		JSONObject json = new JSONObject();
 		json.accumulate("type", 1);
-		json.accumulate("to_id", uids);
+		json.accumulate("to_id", to);
 		json.accumulate("content", message);
 		return json.toString();
 	}
@@ -41,7 +52,15 @@ public class Message implements JSONSerializable {
 		return message;
 	}
 	
-	public ArrayList<Integer> getUids() {
-		return uids;
+	public String getFrom() {
+		return from; 
+	}
+	
+	public Date getCreated() {
+		return created;
+	}
+	
+	public ArrayList<Integer> getTo() {
+		return to;
 	}
 }

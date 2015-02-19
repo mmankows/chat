@@ -3,8 +3,10 @@ package client;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -28,8 +30,11 @@ public class GUI implements ActionListener, MObserver {
 	private JPasswordField textPassword;
 	private String[] usersList;
 	private JList<String> listUsers;
+	SimpleDateFormat dt = new SimpleDateFormat("HH:mm:ss");
 	private final String HOST = "localhost";
 	private final int PORT = 2584;
+	
+	private Logger logger = Logger.getLogger("CLIENT LOGGER");
 
 	/**
 	 * Launch the application.
@@ -165,17 +170,20 @@ public class GUI implements ActionListener, MObserver {
 			updateUserList();
 			break;
 		case MObservableNotification.CODE_MESSAGE:
-			textChat.append(String.format("[%s] %s\n", "MANIEK ZAKODŹ OD KOGO",
-					((Message) obj.message).getMessage().trim()));
+			Message msg = ((Message) obj.message);
+			textChat.append(String.format("[%s] [%s] %s\n", dt.format(msg.getCreated()), msg.getFrom(),
+					msg.getMessage().trim()));
 			break;
 		case MObservableNotification.CODE_CONNECTION_LOST:
 			JOptionPane.showMessageDialog(frame, "Połączenie z serwerem utracone",
 					"Chat", JOptionPane.ERROR_MESSAGE);
 			System.exit(-1);
+		case MObservableNotification.CODE_UNAUTHORIZED:
+			JOptionPane.showMessageDialog(frame, "Zły login/hasło",
+					"Chat", JOptionPane.WARNING_MESSAGE);
+			break;
 		default:
-			System.out.println("UNKNOWN NOTIFICATION CODE");
-			
+			logger.warning("UNKNOWN NOTIFICATION CODE");
 		}
-		System.out.println("DOSTALEM: " + obj.code);
 	}
 }
