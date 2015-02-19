@@ -3,6 +3,10 @@ package client;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -10,12 +14,20 @@ import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import client.historyExporter.BlueStyleDecorator;
+import client.historyExporter.CSVExporter;
+import client.historyExporter.Exporter;
+import client.historyExporter.ExporterFactory;
+import client.historyExporter.RedStyleDecorator;
 
 public class GUI implements ActionListener, MObserver {
 
@@ -25,6 +37,7 @@ public class GUI implements ActionListener, MObserver {
 	private JButton btnSend;
 	private JButton btnRefreshList;
 	private JButton btnLogin;
+	private JButton btnExport;
 	private JTextArea textChat;
 	private JTextField textLogin;
 	private JPasswordField textPassword;
@@ -35,6 +48,13 @@ public class GUI implements ActionListener, MObserver {
 	private final int PORT = 2584;
 	
 	private Logger logger = Logger.getLogger("CLIENT LOGGER");
+	private JFileChooser fileChooser;
+	final Object cssOptions[] = {"Blue", "Red", "None"};
+	
+	private final FileNameExtensionFilter csvFilter = new FileNameExtensionFilter("Plik CSV", "csv");
+	private final FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter("Plik JSON", "json");
+	private final FileNameExtensionFilter htmlFilter = new FileNameExtensionFilter("Plik HTML", "html");
+	
 
 	/**
 	 * Launch the application.
@@ -78,9 +98,9 @@ public class GUI implements ActionListener, MObserver {
 		textMsg = new JTextField();
 		textChat = new JTextArea();
 		btnSend = new JButton("Wyślij");
-
 		btnRefreshList = new JButton("Odśwież");
 		btnLogin = new JButton("Zaloguj");
+		btnExport = new JButton("Eksportuj historię");
 
 		listUsers.setBounds(341, 53, 97, 157);
 		textChat.setBounds(36, 54, 271, 157);
@@ -89,6 +109,7 @@ public class GUI implements ActionListener, MObserver {
 		btnRefreshList.setBounds(321, 16, 117, 25);
 		btnRefreshList.setEnabled(false);
 		btnLogin.setBounds(171, 16, 117, 25);
+		btnExport.setBounds(36, 247, 189, 25);
 
 		textMsg.setBounds(36, 222, 256, 25);
 		textMsg.setColumns(10);
@@ -99,6 +120,7 @@ public class GUI implements ActionListener, MObserver {
 		frame.getContentPane().add(btnRefreshList);
 		frame.getContentPane().add(textMsg);
 		frame.getContentPane().add(btnLogin);
+		frame.getContentPane().add(btnExport);
 
 		textLogin = new JTextField();
 		textLogin.setBounds(10, 10, 100, 20);
@@ -112,6 +134,13 @@ public class GUI implements ActionListener, MObserver {
 		btnSend.addActionListener(this);
 		btnRefreshList.addActionListener(this);
 		btnLogin.addActionListener(this);
+		btnExport.addActionListener(this);
+		
+		fileChooser = new JFileChooser();
+		fileChooser.addChoosableFileFilter(csvFilter);
+		fileChooser.addChoosableFileFilter(jsonFilter);
+		fileChooser.addChoosableFileFilter(htmlFilter);
+		fileChooser.setAcceptAllFileFilterUsed(false);
 	}
 
 	@Override
@@ -148,6 +177,46 @@ public class GUI implements ActionListener, MObserver {
 			btnLogin.setEnabled(false);
 			btnSend.setEnabled(true);
 			btnRefreshList.setEnabled(true);
+		} else if (eventSource == btnExport) {
+			int rVal = fileChooser.showSaveDialog(null);
+			System.out.println(rVal);
+			if(rVal == JFileChooser.APPROVE_OPTION) {
+				Exporter exporter = null;
+				FileNameExtensionFilter fileFilter = (FileNameExtensionFilter) fileChooser.getFileFilter();
+				String extension = fileFilter.getExtensions()[0];
+				exporter = ExporterFactory.createExporter(extension);
+				if(extension.equals("html")) {
+					int dialogResult = JOptionPane.showOptionDialog(frame,
+						    "Wybierz styl dokumentu",
+						    "HTML -",
+						    JOptionPane.YES_NO_CANCEL_OPTION,
+						    JOptionPane.QUESTION_MESSAGE,
+						    null,
+						    cssOptions,
+						    cssOptions[2]);
+					System.out.println(dialogResult);
+					switch(dialogResult) {
+					case 0:
+						exporter = new BlueStyleDecorator(exporter);
+						break;
+					case 1:
+						exporter = new RedStyleDecorator(exporter);
+						break;
+					}
+											
+				}
+				File selectedFile = fileChooser.getSelectedFile();
+				File file = selectedFile.getName().contains(".") ? selectedFile : new File(selectedFile + "." + fileFilter.getExtensions()[0]);
+				BufferedWriter output;
+				try {
+					output = new BufferedWriter(new FileWriter(file));
+					output.write(exporter.export(chatClient.getMessageList()));
+					output.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
+			}
 		}
 	}
 

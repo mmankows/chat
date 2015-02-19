@@ -204,7 +204,8 @@ public class Client implements MObservable {
 	@Override
 	public void notifyObservers() {
 		for (MObserver observer : observers) {
-			observer.update(new MObservableNotification(lastCode, messageList.get(messageList.size() - 1)));
+			
+			observer.update(new MObservableNotification(lastCode, messageList.isEmpty() ? null : messageList.get(messageList.size() - 1)));
 		}
 	}
 }
