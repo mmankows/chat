@@ -3,7 +3,6 @@ package client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -30,15 +29,15 @@ public class Client implements MObservable {
 		}
 		return usersListString;
 	}
-	
+
 	public ArrayList<Message> getMessageList() {
 		return messageList;
 	}
-	
+
 	public String getUserName(int uid) {
 		for (int i = 0; i < userList.size(); i++) {
 			User user = userList.get(i);
-			if(user.getUid() == uid) {
+			if (user.getUid() == uid) {
 				return user.getNick();
 			}
 		}
@@ -57,7 +56,7 @@ public class Client implements MObservable {
 					logger.info(message);
 					handleMessage(message);
 					notifyObservers();
-				} catch(Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 					lastCode = MObservableNotification.CODE_CONNECTION_LOST;
 					notifyObservers();
@@ -72,7 +71,6 @@ public class Client implements MObservable {
 			try {
 				inStream.read(buffer);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return new String(buffer);
@@ -81,8 +79,10 @@ public class Client implements MObservable {
 		void handleMessage(String msg) {
 			JSONObject json;
 			json = new JSONObject(msg);
-			
-			if(json.has("status") && json.getString("status").equals("authentication_problem")) {
+
+			if (json.has("status")
+					&& json.getString("status")
+							.equals("authentication_problem")) {
 				logger.info("Auth failed");
 				lastCode = MObservableNotification.CODE_UNAUTHORIZED;
 				return;
@@ -93,15 +93,13 @@ public class Client implements MObservable {
 			case 2:
 				String action = json.getString("action");
 				JSONArray usersItems = json.getJSONArray("nick_uid");
-				//String nick = (String) userItem.keySet().toArray()[0];
-				//int uid = userItem.getInt(nick);
-				switch(action) {
+				switch (action) {
 				case "add":
-					for (int i = 0 ; i < usersItems.length() ; i++) {
+					for (int i = 0; i < usersItems.length(); i++) {
 						JSONObject obj = usersItems.getJSONObject(i);
 						int uid = obj.getInt("uid");
 						String nick = obj.getString("nick");
-						userList.add(new User(nick, uid)); 
+						userList.add(new User(nick, uid));
 					}
 					break;
 				case "del":
@@ -111,8 +109,7 @@ public class Client implements MObservable {
 					userList.add(new User(nick, uid));
 					for (int i = 0; i < userList.size(); i++) {
 						User user = userList.get(i);
-						if(user.getUid() == uid && user.getNick().equals(nick)) {
-							//System.out.println("REMOVE");
+						if (user.getUid() == uid && user.getNick().equals(nick)) {
 							userList.remove(i);
 							break;
 						}
@@ -172,7 +169,7 @@ public class Client implements MObservable {
 	private void send(String message) {
 		logger.info("Sending message");
 		try {
-			//System.out.println("WYSYLAM: " + message);
+			logger.fine("WYSYLAM: " + message);
 			outStream.write(message.getBytes());
 			outStream.flush();
 		} catch (Exception e) {
@@ -204,8 +201,9 @@ public class Client implements MObservable {
 	@Override
 	public void notifyObservers() {
 		for (MObserver observer : observers) {
-			
-			observer.update(new MObservableNotification(lastCode, messageList.isEmpty() ? null : messageList.get(messageList.size() - 1)));
+
+			observer.update(new MObservableNotification(lastCode, messageList
+					.isEmpty() ? null : messageList.get(messageList.size() - 1)));
 		}
 	}
 }

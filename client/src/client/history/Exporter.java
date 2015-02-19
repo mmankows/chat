@@ -7,6 +7,6 @@ import client.Message;
 
 public abstract class Exporter {
 	SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	
+
 	abstract public String export(ArrayList<Message> messages);
 }

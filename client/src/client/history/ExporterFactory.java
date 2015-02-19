@@ -2,7 +2,7 @@ package client.history;
 
 public class ExporterFactory {
 	public static Exporter createExporter(String type) {
-		switch(type) {
+		switch (type) {
 		case "csv":
 			return new CSVExporter();
 		case "json":
@@ -10,7 +10,8 @@ public class ExporterFactory {
 		case "html":
 			return new HTMLExporter();
 		default:
-			throw new IllegalArgumentException("No factory for file of type'" + type + "'");
+			throw new IllegalArgumentException("No factory for file of type'"
+					+ type + "'");
 		}
 	}
 }

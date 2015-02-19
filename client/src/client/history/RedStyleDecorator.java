@@ -9,7 +9,6 @@ public class RedStyleDecorator extends ExporterDecorator {
 
 	public RedStyleDecorator(Exporter toDecorate) {
 		super(toDecorate);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public String export(ArrayList<Message> messages) {

@@ -31,7 +31,7 @@ import client.history.ExporterFactory;
 import client.history.JSONImporter;
 import client.history.RedStyleDecorator;
 
-public class GUI implements ActionListener, MObserver {
+public class Application implements ActionListener, MObserver {
 
 	private JFrame frame;
 	private JTextField textMsg;
@@ -48,26 +48,25 @@ public class GUI implements ActionListener, MObserver {
 	SimpleDateFormat dt = new SimpleDateFormat("HH:mm:ss");
 	private final String HOST = "localhost";
 	private final int PORT = 2584;
-	
+
 	private Logger logger = Logger.getLogger("CLIENT LOGGER");
 	private JFileChooser fileChooserSave, fileChooserOpen;
-	final Object cssOptions[] = {"Blue", "Red", "None"};
-	
-	private final FileNameExtensionFilter csvFilter = new FileNameExtensionFilter("Plik CSV", "csv");
-	private final FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter("Plik JSON", "json");
-	private final FileNameExtensionFilter htmlFilter = new FileNameExtensionFilter("Plik HTML", "html");
+	final Object cssOptions[] = { "Blue", "Red", "None" };
+
+	private final FileNameExtensionFilter csvFilter = new FileNameExtensionFilter(
+			"Plik CSV", "csv");
+	private final FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter(
+			"Plik JSON", "json");
+	private final FileNameExtensionFilter htmlFilter = new FileNameExtensionFilter(
+			"Plik HTML", "html");
 	private JButton btnImport;
 	private CSVImporter importerChain;
-	
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUI window = new GUI();
+					Application window = new Application();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -76,28 +75,22 @@ public class GUI implements ActionListener, MObserver {
 		});
 	}
 
-	/**
-	 * Create the application.
-	 */
-	public GUI() {
+	public Application() {
 		chatClient.addObserwer(this);
-		if(!chatClient.connect(HOST, PORT)) {
-			JOptionPane.showMessageDialog(frame, String.format("Brak połączenia z serwerem %s:%s", HOST, PORT),
-					"Chat", JOptionPane.ERROR_MESSAGE);
+		if (!chatClient.connect(HOST, PORT)) {
+			JOptionPane.showMessageDialog(frame, String.format(
+					"Brak połączenia z serwerem %s:%s", HOST, PORT), "Chat",
+					JOptionPane.ERROR_MESSAGE);
 			System.exit(-2);
 		}
 		initialize();
 	}
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
 	private void initialize() {
 		// tworzenie łańcucha odpowiedzialności
 		importerChain = new CSVImporter();
 		importerChain.setNext(new JSONImporter());
-		
-		
+
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -148,13 +141,13 @@ public class GUI implements ActionListener, MObserver {
 		btnLogin.addActionListener(this);
 		btnExport.addActionListener(this);
 		btnImport.addActionListener(this);
-		
+
 		fileChooserSave = new JFileChooser();
 		fileChooserSave.addChoosableFileFilter(csvFilter);
 		fileChooserSave.addChoosableFileFilter(jsonFilter);
 		fileChooserSave.addChoosableFileFilter(htmlFilter);
 		fileChooserSave.setAcceptAllFileFilterUsed(false);
-		
+
 		fileChooserOpen = new JFileChooser();
 	}
 
@@ -163,19 +156,24 @@ public class GUI implements ActionListener, MObserver {
 		Object eventSource = e.getSource();
 		if (eventSource == btnSend) {
 			String message = textMsg.getText();
-			if(listUsers.isSelectionEmpty()) {
-				JOptionPane.showMessageDialog(frame, "Nie zaznaczyłeś użytkowników do których chcesz wysłać wiadomość",
-						"Chat", JOptionPane.WARNING_MESSAGE);
+			if (listUsers.isSelectionEmpty()) {
+				JOptionPane
+						.showMessageDialog(
+								frame,
+								"Nie zaznaczyłeś użytkowników do których chcesz wysłać wiadomość",
+								"Chat", JOptionPane.WARNING_MESSAGE);
 			}
 			if (message.isEmpty()) {
-				JOptionPane.showMessageDialog(frame, "Nie podałeś treści wiadomości",
-						"Chat", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(frame,
+						"Nie podałeś treści wiadomości", "Chat",
+						JOptionPane.WARNING_MESSAGE);
 				return;
 			}
-			System.out.println(listUsers.getSelectedValuesList());
-			
+
 			List<String> selectedList = listUsers.getSelectedValuesList();
-			chatClient.sendMessage(selectedList.toArray(new String[selectedList.size()]), message);
+			chatClient.sendMessage(
+					selectedList.toArray(new String[selectedList.size()]),
+					message);
 		} else if (eventSource == btnRefreshList) {
 			updateUserList();
 		} else if (eventSource == btnLogin) {
@@ -194,23 +192,19 @@ public class GUI implements ActionListener, MObserver {
 			btnRefreshList.setEnabled(true);
 		} else if (eventSource == btnExport) {
 			int rVal = fileChooserSave.showSaveDialog(null);
-			System.out.println(rVal);
-			if(rVal == JFileChooser.APPROVE_OPTION) {
+			if (rVal == JFileChooser.APPROVE_OPTION) {
 				Exporter exporter = null;
-				FileNameExtensionFilter fileFilter = (FileNameExtensionFilter) fileChooserSave.getFileFilter();
+				FileNameExtensionFilter fileFilter = (FileNameExtensionFilter) fileChooserSave
+						.getFileFilter();
 				String extension = fileFilter.getExtensions()[0];
 				exporter = ExporterFactory.createExporter(extension);
-				if(extension.equals("html")) {
+				if (extension.equals("html")) {
 					int dialogResult = JOptionPane.showOptionDialog(frame,
-						    "Wybierz styl dokumentu",
-						    "HTML -",
-						    JOptionPane.YES_NO_CANCEL_OPTION,
-						    JOptionPane.QUESTION_MESSAGE,
-						    null,
-						    cssOptions,
-						    cssOptions[2]);
-					System.out.println(dialogResult);
-					switch(dialogResult) {
+							"Wybierz styl dokumentu", "HTML -",
+							JOptionPane.YES_NO_CANCEL_OPTION,
+							JOptionPane.QUESTION_MESSAGE, null, cssOptions,
+							cssOptions[2]);
+					switch (dialogResult) {
 					case 0:
 						exporter = new BlueStyleDecorator(exporter);
 						break;
@@ -218,10 +212,12 @@ public class GUI implements ActionListener, MObserver {
 						exporter = new RedStyleDecorator(exporter);
 						break;
 					}
-											
+
 				}
 				File selectedFile = fileChooserSave.getSelectedFile();
-				File file = selectedFile.getName().contains(".") ? selectedFile : new File(selectedFile + "." + fileFilter.getExtensions()[0]);
+				File file = selectedFile.getName().contains(".") ? selectedFile
+						: new File(selectedFile + "."
+								+ fileFilter.getExtensions()[0]);
 				BufferedWriter output;
 				try {
 					output = new BufferedWriter(new FileWriter(file));
@@ -230,27 +226,27 @@ public class GUI implements ActionListener, MObserver {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				
+
 			}
 		} else if (eventSource == btnImport) {
 			int rVal = fileChooserOpen.showOpenDialog(null);
-			
-			if(rVal == JFileChooser.APPROVE_OPTION) {
+
+			if (rVal == JFileChooser.APPROVE_OPTION) {
 				File file = fileChooserOpen.getSelectedFile();
 				try {
-					String fileContent = new String(Files.readAllBytes(file.toPath()));
-					System.out.println(fileContent);
-					ArrayList<Message> history = importerChain.process(fileContent);
-					if(history != null) {
-						System.out.println("OK!");
-						for(Message item : history) {
-							textChat.append(String.format("* [%s] [%s] %s\n", dt.format(item.getCreated()), item.getFrom(),
-									item.getMessage().trim()));
+					String fileContent = new String(Files.readAllBytes(file
+							.toPath()));
+					ArrayList<Message> history = importerChain
+							.process(fileContent);
+					if (history != null) {
+						for (Message item : history) {
+							textChat.append(String.format("* [%s] [%s] %s\n",
+									dt.format(item.getCreated()),
+									item.getFrom(), item.getMessage().trim()));
 						}
 						JOptionPane.showMessageDialog(frame, "Zaimportowano",
 								"Chat", JOptionPane.INFORMATION_MESSAGE);
-					}
-					else {
+					} else {
 						JOptionPane.showMessageDialog(frame, "Błąd importu",
 								"Chat", JOptionPane.WARNING_MESSAGE);
 					}
@@ -264,9 +260,6 @@ public class GUI implements ActionListener, MObserver {
 
 	private void updateUserList() {
 		usersList = chatClient.getUserList();
-		for (int i = 0; i < usersList.length; i++) {
-			System.out.println(usersList[i]);
-		}
 		DefaultListModel<String> listUsersModel = new DefaultListModel<>();
 		for (int i = 0; i < usersList.length; i++) {
 			listUsersModel.addElement(usersList[i]);
@@ -282,16 +275,17 @@ public class GUI implements ActionListener, MObserver {
 			break;
 		case MObservableNotification.CODE_MESSAGE:
 			Message msg = ((Message) obj.message);
-			textChat.append(String.format("[%s] [%s] %s\n", dt.format(msg.getCreated()), msg.getFrom(),
-					msg.getMessage().trim()));
+			textChat.append(String.format("[%s] [%s] %s\n", dt.format(msg
+					.getCreated()), msg.getFrom(), msg.getMessage().trim()));
 			break;
 		case MObservableNotification.CODE_CONNECTION_LOST:
-			JOptionPane.showMessageDialog(frame, "Połączenie z serwerem utracone",
-					"Chat", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(frame,
+					"Połączenie z serwerem utracone", "Chat",
+					JOptionPane.ERROR_MESSAGE);
 			System.exit(-1);
 		case MObservableNotification.CODE_UNAUTHORIZED:
-			JOptionPane.showMessageDialog(frame, "Zły login/hasło",
-					"Chat", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(frame, "Zły login/hasło", "Chat",
+					JOptionPane.WARNING_MESSAGE);
 			break;
 		default:
 			logger.warning("UNKNOWN NOTIFICATION CODE");
