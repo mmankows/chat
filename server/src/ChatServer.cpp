@@ -5,7 +5,6 @@
 #include <pthread.h>
 #include <openssl/md5.h>
 
-
 //constructor
 ChatServer::ChatServer(int port) {
     this->port = port;
@@ -61,13 +60,12 @@ int ChatServer::auth(string auth_token) {
     string login  = auth_token.substr(0,delim_pos);
     string pass   = auth_token.substr(delim_pos+1);
 
-    //comput md5hashsum of password
+    //compute md5hashsum of password
     unsigned char result[MD5_DIGEST_LENGTH+1];
     MD5((const unsigned char*) pass.c_str(), (unsigned long)pass.length(), result);
     result[MD5_DIGEST_LENGTH] = '\0';
     string hash = (const char*)result;
 
-//    return _auth_file(login, hash);
     return auth_file(login, pass);
 
 }
@@ -94,7 +92,6 @@ void ChatServer::init() {
     if(listenfd < 0) {
         cerr << "Cannot open socket" << endl;
         exit(-1);
-        //
     }
 
     srv_addr.sin_family      = AF_INET;
@@ -104,7 +101,6 @@ void ChatServer::init() {
     if( bind(listenfd, (struct sockaddr*)&srv_addr, sizeof(srv_addr) ) < 0 ) {
         cerr << "Cannot bind" << endl;
         exit(-1);
-        //
     }
     cout<<"Server properly initialized"<<endl;
 
@@ -136,6 +132,7 @@ void* serve_user(void* ptr) {
     while( 1 ) {
         
         StdMsg m = user_ptr->getMsg();                          //blocking reading from socket, deserialize, pack to class
+        m.setSender( user_ptr->getId() );
                                                                 //TODO mutex lock inside of User.sendMsg();
         if( !m.getStatus() ) {
             cout<<"Problem while reading msg from user\n";
@@ -153,21 +150,16 @@ void* serve_user(void* ptr) {
 }
 
 void ChatServer::startListening(void) {
-    cout<<"ChatServer::startListening()"<<endl;
     struct sockaddr_in cli_addr;
     int    size      = sizeof(cli_addr);
     pthread_t tid    = 0;
     int    clientfd  = 0;
     
-
     listen(this->listenfd, 30);
 
     while(1) {
-        cout<<"Listening for connection!\n";
         clientfd = accept( listenfd, (struct sockaddr*) &cli_addr, (socklen_t*)&size);
-        cout<<"Incomming connection!\n";
         pthread_create(&tid, NULL, serve_user, (void*) new std::pair<ChatServer*,int>(this,clientfd) );
-        cout<<"Created thread for new connection!\n";
     }
 
 }

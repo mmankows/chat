@@ -33,6 +33,9 @@ bool StdMsg::serialize(int sockfd) {
         
     writer.String("type");
     writer.Int(type);
+    
+    writer.String("from_id");
+    writer.Int(from_id);
 
     writer.String("to_id");
     writer.StartArray();

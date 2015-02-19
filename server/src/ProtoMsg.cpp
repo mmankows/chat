@@ -32,7 +32,9 @@ bool ProtoMsg::serialize(int sockfd) {
 
     for (vector<pair<int,string> >::iterator it=id_nick_pairs.begin(); it != id_nick_pairs.end(); ++it) {
         writer.StartObject();
+        writer.String("nick");
         writer.String((*it).second.c_str() );
+        writer.String("uid");
         writer.Int((*it).first);    
         writer.EndObject();
     }

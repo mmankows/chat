@@ -23,6 +23,7 @@ class User : public Observer<Msg> {
     User(int user_fd, int user_id, string login);
     ~User();
 
+    //Udostępnienie prostego interfejsu do obsłygi użytkownika wysyłanie,odbieranie - Fasada
     void       notify(Msg& m) { sendMsg(m); }
     bool       sendMsg(Msg& m);
     StdMsg     getMsg(void);

@@ -5,14 +5,12 @@
 User::User(int user_fd) {
     this->user_fd = user_fd;
     this->user_id = -1;
-
 }
 
 User::User(int user_fd, int user_id, string login) {
     this->user_fd = user_fd;
     this->user_id = user_id;
     this->user_login = login;
-
 }
 
 User::~User() {
@@ -20,12 +18,10 @@ User::~User() {
 }
 
 bool User::sendMsg(Msg& m) {
-    printf("Sending msg");
     m.send( getFd() );
 }
 
 StdMsg User::getMsg(void) {
-    printf("Reading msg");
     StdMsg m;
     m.get( getFd() );
     return m;
