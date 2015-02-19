@@ -1,4 +1,4 @@
-package client.historyExporter;
+package client.history;
 
 public class ExporterFactory {
 	public static Exporter createExporter(String type) {

@@ -1,5 +1,7 @@
 package client;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -10,10 +12,17 @@ public class Message {
 	ArrayList<Integer> to = new ArrayList<Integer>();
 	String from = null;
 	String message = null;
-	final Date created = new Date();
+	Date created = new Date();
+	SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
 	public Message() {
 		
+	}
+	
+	public Message(String message, String created, String from) throws ParseException {
+		this.message = message;
+		this.created = dt.parse(created);
+		this.from = from;
 	}
 	
 	public Message(String message, ArrayList<Integer> uids) {
@@ -48,18 +57,26 @@ public class Message {
 		return json.toString();
 	}
 	
+	public String getFrom() {
+		return from;
+	}
+
+	public void setFrom(String from) {
+		this.from = from;
+	}
+
 	public String getMessage() {
 		return message;
 	}
-	
-	public String getFrom() {
-		return from; 
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
-	
+
 	public Date getCreated() {
 		return created;
 	}
-	
+
 	public ArrayList<Integer> getTo() {
 		return to;
 	}

@@ -7,8 +7,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -23,11 +24,12 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import client.historyExporter.BlueStyleDecorator;
-import client.historyExporter.CSVExporter;
-import client.historyExporter.Exporter;
-import client.historyExporter.ExporterFactory;
-import client.historyExporter.RedStyleDecorator;
+import client.history.BlueStyleDecorator;
+import client.history.CSVImporter;
+import client.history.Exporter;
+import client.history.ExporterFactory;
+import client.history.JSONImporter;
+import client.history.RedStyleDecorator;
 
 public class GUI implements ActionListener, MObserver {
 
@@ -48,12 +50,14 @@ public class GUI implements ActionListener, MObserver {
 	private final int PORT = 2584;
 	
 	private Logger logger = Logger.getLogger("CLIENT LOGGER");
-	private JFileChooser fileChooser;
+	private JFileChooser fileChooserSave, fileChooserOpen;
 	final Object cssOptions[] = {"Blue", "Red", "None"};
 	
 	private final FileNameExtensionFilter csvFilter = new FileNameExtensionFilter("Plik CSV", "csv");
 	private final FileNameExtensionFilter jsonFilter = new FileNameExtensionFilter("Plik JSON", "json");
 	private final FileNameExtensionFilter htmlFilter = new FileNameExtensionFilter("Plik HTML", "html");
+	private JButton btnImport;
+	private CSVImporter importerChain;
 	
 
 	/**
@@ -89,6 +93,11 @@ public class GUI implements ActionListener, MObserver {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		// tworzenie łańcucha odpowiedzialności
+		importerChain = new CSVImporter();
+		importerChain.setNext(new JSONImporter());
+		
+		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -101,6 +110,7 @@ public class GUI implements ActionListener, MObserver {
 		btnRefreshList = new JButton("Odśwież");
 		btnLogin = new JButton("Zaloguj");
 		btnExport = new JButton("Eksportuj historię");
+		btnImport = new JButton("Importuj historię");
 
 		listUsers.setBounds(341, 53, 97, 157);
 		textChat.setBounds(36, 54, 271, 157);
@@ -109,7 +119,8 @@ public class GUI implements ActionListener, MObserver {
 		btnRefreshList.setBounds(321, 16, 117, 25);
 		btnRefreshList.setEnabled(false);
 		btnLogin.setBounds(171, 16, 117, 25);
-		btnExport.setBounds(36, 247, 189, 25);
+		btnExport.setBounds(36, 247, 168, 25);
+		btnImport.setBounds(219, 247, 117, 25);
 
 		textMsg.setBounds(36, 222, 256, 25);
 		textMsg.setColumns(10);
@@ -121,6 +132,7 @@ public class GUI implements ActionListener, MObserver {
 		frame.getContentPane().add(textMsg);
 		frame.getContentPane().add(btnLogin);
 		frame.getContentPane().add(btnExport);
+		frame.getContentPane().add(btnImport);
 
 		textLogin = new JTextField();
 		textLogin.setBounds(10, 10, 100, 20);
@@ -135,12 +147,15 @@ public class GUI implements ActionListener, MObserver {
 		btnRefreshList.addActionListener(this);
 		btnLogin.addActionListener(this);
 		btnExport.addActionListener(this);
+		btnImport.addActionListener(this);
 		
-		fileChooser = new JFileChooser();
-		fileChooser.addChoosableFileFilter(csvFilter);
-		fileChooser.addChoosableFileFilter(jsonFilter);
-		fileChooser.addChoosableFileFilter(htmlFilter);
-		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooserSave = new JFileChooser();
+		fileChooserSave.addChoosableFileFilter(csvFilter);
+		fileChooserSave.addChoosableFileFilter(jsonFilter);
+		fileChooserSave.addChoosableFileFilter(htmlFilter);
+		fileChooserSave.setAcceptAllFileFilterUsed(false);
+		
+		fileChooserOpen = new JFileChooser();
 	}
 
 	@Override
@@ -178,11 +193,11 @@ public class GUI implements ActionListener, MObserver {
 			btnSend.setEnabled(true);
 			btnRefreshList.setEnabled(true);
 		} else if (eventSource == btnExport) {
-			int rVal = fileChooser.showSaveDialog(null);
+			int rVal = fileChooserSave.showSaveDialog(null);
 			System.out.println(rVal);
 			if(rVal == JFileChooser.APPROVE_OPTION) {
 				Exporter exporter = null;
-				FileNameExtensionFilter fileFilter = (FileNameExtensionFilter) fileChooser.getFileFilter();
+				FileNameExtensionFilter fileFilter = (FileNameExtensionFilter) fileChooserSave.getFileFilter();
 				String extension = fileFilter.getExtensions()[0];
 				exporter = ExporterFactory.createExporter(extension);
 				if(extension.equals("html")) {
@@ -205,7 +220,7 @@ public class GUI implements ActionListener, MObserver {
 					}
 											
 				}
-				File selectedFile = fileChooser.getSelectedFile();
+				File selectedFile = fileChooserSave.getSelectedFile();
 				File file = selectedFile.getName().contains(".") ? selectedFile : new File(selectedFile + "." + fileFilter.getExtensions()[0]);
 				BufferedWriter output;
 				try {
@@ -216,6 +231,33 @@ public class GUI implements ActionListener, MObserver {
 					e1.printStackTrace();
 				}
 				
+			}
+		} else if (eventSource == btnImport) {
+			int rVal = fileChooserOpen.showOpenDialog(null);
+			
+			if(rVal == JFileChooser.APPROVE_OPTION) {
+				File file = fileChooserOpen.getSelectedFile();
+				try {
+					String fileContent = new String(Files.readAllBytes(file.toPath()));
+					System.out.println(fileContent);
+					ArrayList<Message> history = importerChain.process(fileContent);
+					if(history != null) {
+						System.out.println("OK!");
+						for(Message item : history) {
+							textChat.append(String.format("* [%s] [%s] %s\n", dt.format(item.getCreated()), item.getFrom(),
+									item.getMessage().trim()));
+						}
+						JOptionPane.showMessageDialog(frame, "Zaimportowano",
+								"Chat", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else {
+						JOptionPane.showMessageDialog(frame, "Błąd importu",
+								"Chat", JOptionPane.WARNING_MESSAGE);
+					}
+				} catch (IOException e1) {
+					JOptionPane.showMessageDialog(frame, "Błąd odczytu pliku",
+							"Chat", JOptionPane.WARNING_MESSAGE);
+				}
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package client.historyExporter;
+package client.history;
 
 import java.util.ArrayList;
 
