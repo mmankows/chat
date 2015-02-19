@@ -106,6 +106,10 @@ void ChatServer::init() {
 
 }
 
+void bad_auth(int sockfd) {
+    char msg[] = "{\"status\":\"authentication_problem\"}";
+    write(sockfd,msg,strlen(msg) );
+}
 
 //Main subroutine for serving specific User
 void* serve_user(void* ptr) {
@@ -122,6 +126,7 @@ void* serve_user(void* ptr) {
 
     token    = ChatServer::get_auth_token(sockfd);
     if ( ( user_id  = srv_ptr->auth( token ) ) <= 0 ) {
+        bad_auth(sockfd);
         close(sockfd);
         return NULL;
     };
