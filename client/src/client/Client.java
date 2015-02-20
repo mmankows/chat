@@ -106,7 +106,6 @@ public class Client implements MObservable {
 					JSONObject obj = usersItems.getJSONObject(0);
 					int uid = obj.getInt("uid");
 					String nick = obj.getString("nick");
-					userList.add(new User(nick, uid));
 					for (int i = 0; i < userList.size(); i++) {
 						User user = userList.get(i);
 						if (user.getUid() == uid && user.getNick().equals(nick)) {

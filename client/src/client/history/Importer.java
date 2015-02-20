@@ -13,7 +13,7 @@ public abstract class Importer {
 
 	public ArrayList<Message> process(String toProcess) {
 		ArrayList<Message> result = importHistory(toProcess);
-		return result != null ? result : next.process(toProcess);
+		return result != null ? result : (next != null ? next.process(toProcess) : null);
 	}
 
 	abstract ArrayList<Message> importHistory(String toImport);

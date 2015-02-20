@@ -37,7 +37,6 @@ public class Application implements ActionListener, MObserver {
 	private JTextField textMsg;
 	private Client chatClient = new Client();
 	private JButton btnSend;
-	private JButton btnRefreshList;
 	private JButton btnLogin;
 	private JButton btnExport;
 	private JTextArea textChat;
@@ -51,7 +50,7 @@ public class Application implements ActionListener, MObserver {
 
 	private Logger logger = Logger.getLogger("CLIENT LOGGER");
 	private JFileChooser fileChooserSave, fileChooserOpen;
-	final Object cssOptions[] = { "Blue", "Red", "None" };
+	final Object cssOptions[] = { "Niebieski", "Czerwony", "Brak" };
 
 	private final FileNameExtensionFilter csvFilter = new FileNameExtensionFilter(
 			"Plik CSV", "csv");
@@ -100,44 +99,42 @@ public class Application implements ActionListener, MObserver {
 		textMsg = new JTextField();
 		textChat = new JTextArea();
 		btnSend = new JButton("Wyślij");
-		btnRefreshList = new JButton("Odśwież");
 		btnLogin = new JButton("Zaloguj");
-		btnExport = new JButton("Eksportuj historię");
-		btnImport = new JButton("Importuj historię");
+		btnExport = new JButton("Eksport historii");
+		btnImport = new JButton("Import historii");
 
-		listUsers.setBounds(341, 53, 97, 157);
-		textChat.setBounds(36, 54, 271, 157);
-		btnSend.setBounds(321, 222, 117, 25);
+		listUsers.setBounds(340, 80, 95, 160);
+		textChat.setBounds(25, 80, 290, 160);
+		textChat.setEditable(false);
+		btnSend.setBounds(340, 250, 95, 25);
 		btnSend.setEnabled(false);
-		btnRefreshList.setBounds(321, 16, 117, 25);
-		btnRefreshList.setEnabled(false);
-		btnLogin.setBounds(171, 16, 117, 25);
-		btnExport.setBounds(36, 247, 168, 25);
-		btnImport.setBounds(219, 247, 117, 25);
+		btnLogin.setBounds(325, 10, 110, 20);
+		btnExport.setBounds(25, 40, 200, 25);
+		btnExport.setEnabled(false);
+		btnImport.setBounds(235, 40, 200, 25);
 
-		textMsg.setBounds(36, 222, 256, 25);
+		textMsg.setBounds(25, 250, 290, 25);
 		textMsg.setColumns(10);
+		textMsg.setEditable(false);
 
 		frame.getContentPane().add(listUsers);
 		frame.getContentPane().add(textChat);
 		frame.getContentPane().add(btnSend);
-		frame.getContentPane().add(btnRefreshList);
 		frame.getContentPane().add(textMsg);
 		frame.getContentPane().add(btnLogin);
 		frame.getContentPane().add(btnExport);
 		frame.getContentPane().add(btnImport);
 
 		textLogin = new JTextField();
-		textLogin.setBounds(10, 10, 100, 20);
+		textLogin.setBounds(25, 10, 140, 20);
 		frame.getContentPane().add(textLogin);
 		textLogin.setColumns(10);
 
 		textPassword = new JPasswordField();
-		textPassword.setBounds(10, 30, 100, 20);
+		textPassword.setBounds(170, 10, 140, 20);
 		frame.getContentPane().add(textPassword);
 
 		btnSend.addActionListener(this);
-		btnRefreshList.addActionListener(this);
 		btnLogin.addActionListener(this);
 		btnExport.addActionListener(this);
 		btnImport.addActionListener(this);
@@ -146,6 +143,7 @@ public class Application implements ActionListener, MObserver {
 		fileChooserSave.addChoosableFileFilter(csvFilter);
 		fileChooserSave.addChoosableFileFilter(jsonFilter);
 		fileChooserSave.addChoosableFileFilter(htmlFilter);
+		fileChooserSave.setFileFilter(csvFilter);
 		fileChooserSave.setAcceptAllFileFilterUsed(false);
 
 		fileChooserOpen = new JFileChooser();
@@ -174,8 +172,6 @@ public class Application implements ActionListener, MObserver {
 			chatClient.sendMessage(
 					selectedList.toArray(new String[selectedList.size()]),
 					message);
-		} else if (eventSource == btnRefreshList) {
-			updateUserList();
 		} else if (eventSource == btnLogin) {
 			String login = textLogin.getText();
 			@SuppressWarnings("deprecation")
@@ -188,8 +184,11 @@ public class Application implements ActionListener, MObserver {
 
 			chatClient.login(login, password);
 			btnLogin.setEnabled(false);
+			textLogin.setEditable(false);
+			textPassword.setEditable(false);
+			textMsg.setEditable(true);
 			btnSend.setEnabled(true);
-			btnRefreshList.setEnabled(true);
+			btnExport.setEnabled(true);
 		} else if (eventSource == btnExport) {
 			int rVal = fileChooserSave.showSaveDialog(null);
 			if (rVal == JFileChooser.APPROVE_OPTION) {
