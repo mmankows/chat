@@ -32,7 +32,7 @@ class ChatServer {
     friend void*  serve_user(void*);
     
     public:
-    ChatServer(int port=258412);
+    ChatServer(int port=2584);
     ChatServer(const ChatServer& );
     ~ChatServer();
 
